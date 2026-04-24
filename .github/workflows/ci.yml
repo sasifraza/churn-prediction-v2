@@ -4,10 +4,6 @@ on:
   push:
     branches: [main]
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -21,8 +17,8 @@ jobs:
       - name: Login to Azure
         run: |
           az login --service-principal \
-            --username ${{ secrets.AZURE_CLIENT_ID }} \
-            --password ${{ secrets.AZURE_CREDENTIALS }} \
+            -u ${{ secrets.AZURE_CLIENT_ID }} \
+            -p "${{ secrets.AZURE_CLIENT_SECRET }}" \
             --tenant ${{ secrets.AZURE_TENANT_ID }}
 
       # Step 3 - Login to ACR
