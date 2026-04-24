@@ -1,51 +1,38 @@
-# Name of this workflow - shows in GitHub Actions tab
-name: Deploy Demand Forecasting API
+name: Deploy Churn Prediction API
 
-# TRIGGER - when to run this workflow
 on:
-  push:                    # run when code is pushed
-    branches: [main]       # only on main branch
+  push:
+    branches: [main]
 
-# JOBS - what to do
 jobs:
-  deploy:                          # job name
-    runs-on: ubuntu-latest         # run on fresh Linux VM in GitHub
+  deploy:
+    runs-on: ubuntu-latest
 
-    # STEPS - sequence of actions
     steps:
-
-      # Step 1 - Download your code onto the VM
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2 - Login to Azure using your credentials secret
       - name: Login to Azure
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}  # the JSON you saved
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Step 3 - Login to your Azure Container Registry
       - name: Login to ACR
         run: |
-          az acr login --name ${{ secrets.ACR_NAME }}  
+          az acr login --name ${{ secrets.ACR_NAME }}
 
-      # Step 4 - Build Docker image and push to ACR
       - name: Build and push image
         run: |
-          docker build \
-            -t ${{ secrets.ACR_NAME }}.azurecr.io/demand-api:latest \
-            .
-          docker push \
-            ${{ secrets.ACR_NAME }}.azurecr.io/demand-api:latest
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/churn-api:latest .
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/churn-api:latest
 
-      # Step 5 - Tell Container App to use the new image
       - name: Deploy to Container Apps
         run: |
           az containerapp update \
             --name churn-prediction-app \
             --resource-group ${{ secrets.RESOURCE_GROUP }} \
-            --image ${{ secrets.ACR_NAME }}.azurecr.io/demand-api:latest
-      # Step 6 - Route traffic to latest revision
+            --image ${{ secrets.ACR_NAME }}.azurecr.io/churn-api:latest
+
       - name: Set traffic to latest revision
         run: |
           az containerapp revision set-mode \
@@ -56,4 +43,3 @@ jobs:
             --name churn-prediction-app \
             --resource-group ${{ secrets.RESOURCE_GROUP }} \
             --revision-weight latest=100
-        
