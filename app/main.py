@@ -16,7 +16,7 @@ try:
     model = joblib.load(MODEL_PATH)
     print(f"Model loaded from {MODEL_PATH}")
 except Exception as e:
-    print(f"Model loaded from: {e}")
+    print(f"ERROR loading model: {e}")
     model=None
 
 # create app
